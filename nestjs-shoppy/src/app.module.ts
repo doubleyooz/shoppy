@@ -34,6 +34,8 @@ import * as Joi from 'joi';
         DATABASE_URL: Joi.string().required(),
         PORT: Joi.number().required(),
         HASH_SALT: Joi.number().required(),
+        JWT_SECRET: Joi.string().required(),
+        JWT_EXPIRATION: Joi.string().required(),
       }),
       isGlobal: true,
     }),
