@@ -6,7 +6,7 @@ export function middleware(request: NextRequest) {
   if (
     !authenticated() &&
     !unauthenticatedRoutes.some((route) =>
-      request.nextUrl.pathname.startsWith(route.title)
+      request.nextUrl.pathname.startsWith(route.path)
     )
   ) {
     return Response.redirect(new URL("/auth/login", request.url));

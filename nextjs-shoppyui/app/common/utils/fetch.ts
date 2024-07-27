@@ -19,9 +19,15 @@ export const post = async (path: string, formData: FormData) => {
   return { error: "" };
 };
 
-export const get = async (path: string) => {
-  const res = await fetch(`${API_URL}/${path}`, {
-    headers: { ...getHeaders() },
-  });
-  return res.json();
+export const get = async <T>(path: string): Promise<T> => {
+  const url = `${API_URL}/${path}`;
+  const headers = getHeaders();
+
+  const response = await fetch(url, { headers });
+
+  try {
+    return (await response.json()) as T;
+  } catch (error) {
+    throw new Error(`Failed to parse response from ${url}: ${error}`);
+  }
 };

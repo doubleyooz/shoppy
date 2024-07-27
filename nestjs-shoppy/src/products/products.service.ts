@@ -10,4 +10,8 @@ export class ProductsService {
       data: { ...data, userId },
     });
   }
+
+  async getProducts() {
+    return this.prismaService.product.findMany();
+  }
 }
