@@ -9,9 +9,10 @@ import {
   Typography,
 } from "@mui/material";
 import { CSSProperties, useState } from "react";
-import { FormResponse } from "../../common/interfaces/form-response.interface";
-import createProduct from "../actions/create-product";
 import { CloudUpload } from "@mui/icons-material";
+import { FormResponse } from "@/app/common/interfaces/form-response.interface";
+import createProduct from "../actions/create-product";
+import { IMAGES } from "@/app/common/constants/images";
 
 interface CreateProductModalProps {
   open: boolean;
@@ -47,12 +48,12 @@ export default function CreateProductModal({
   onClose,
 }: CreateProductModalProps) {
   const [response, setResponse] = useState<FormResponse>();
-  const [filename, setFilename] = useState("");
+  const [filenames, setFilenames] = useState<string[]>([]);
 
   const handleClose = () => {
     setResponse(undefined);
     onClose();
-    setFilename("");
+    setFilenames([]);
   };
 
   return (
@@ -99,17 +100,22 @@ export default function CreateProductModal({
               variant="outlined"
               startIcon={<CloudUpload />}
             >
-              Upload File
+              Upload Files
               <input
                 type="file"
-                name="image"
+                name={IMAGES}
+                multiple
                 style={fileInputStyles}
                 onChange={(e) =>
-                  e.target.files && setFilename(e.target.files[0].name)
+                  e.target.files &&
+                  setFilenames(Array.from(e.target.files).map((f) => f.name))
                 }
               ></input>
             </Button>
-            <Typography>{filename}</Typography>
+            {filenames.map((filename, index) => (
+              <Typography key={index}>{filename}</Typography>
+            ))}
+
             <Button type="submit" variant="contained">
               Submit
             </Button>

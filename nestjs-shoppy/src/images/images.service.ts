@@ -1,27 +1,24 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Image } from '@prisma/client';
 
 @Injectable()
 export class ImagesService {
   constructor(private readonly prismaService: PrismaService) {}
-  async createImage(
-    _file: Express.Multer.File,
-    productId: number,
-    productName: string,
-  ) {
+  async createImage(_file: Express.Multer.File, productId: number) {
+    await this.hasReachedMaxImages(productId);
     return await this.prismaService.image.create({
-      data: { name: productName + '-' + _file.filename, productId },
+      data: { name: productId + '-' + _file.filename, productId },
     });
   }
 
   async createManyImages(
     _files: Array<Express.Multer.File>,
     productId: number,
-    productName: string,
   ) {
+    await this.hasReachedMaxImages(productId, _files.length);
     const mappedFiles = _files.map((file) => ({
-      name: productName + '-' + file.filename,
+      name: productId + '-' + file.filename,
       productId,
     })) as Omit<Image, 'id'>[];
 
@@ -36,5 +33,14 @@ export class ImagesService {
         productId: productId,
       },
     });
+  }
+
+  private async hasReachedMaxImages(productId: number, newImagesCount = 1) {
+    const imagesCount = await this.prismaService.image.count({
+      where: { productId: productId },
+    });
+
+    if (imagesCount + newImagesCount > 5)
+      new BadRequestException('cannot upload more than 5 images');
   }
 }

@@ -52,7 +52,7 @@ import { ImagesModule } from './images/images.module';
     ProductsModule,
     ImagesModule,
   ],
-  controllers: [AppController, ImagesController],
+  controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {}
