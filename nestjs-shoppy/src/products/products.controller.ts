@@ -6,7 +6,7 @@ import {
   MaxFileSizeValidator,
   ParseFilePipe,
   Post,
-  UploadedFile,
+  UploadedFiles,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -15,7 +15,7 @@ import { CreateProductRequest } from './dto/create-product.request';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { TokenPayload } from '../auth/token-payload.interface';
 import { ProductsService } from './products.service';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 
 @Controller('products')
@@ -23,42 +23,38 @@ export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
   @Post()
   @UseGuards(JwtAuthGuard)
-  async createProduct(
-    @Body() body: CreateProductRequest,
-    @CurrentUser() user: TokenPayload,
-  ) {
-    return this.productsService.createProduct(body, user.userId);
-  }
-
-  @Post(':productId/image')
-  @UseGuards(JwtAuthGuard)
   @UseInterceptors(
-    FileInterceptor('image', {
+    FilesInterceptor('images', 6, {
       storage: diskStorage({
         destination: 'public/products',
         filename: (req, file, cb) => {
           const name = file.originalname.split('.')[0];
           const ext = file.originalname.split('.')[1];
-          cb(null, `${req.params.productId}-${name}-${Date.now()}.${ext}`);
+          cb(null, `${req.body.name}-${name}-${Date.now()}.${ext}`);
         },
       }),
     }),
   )
-  async uploadProductImage(
-    @UploadedFile(
+  createProduct(
+    @UploadedFiles(
       new ParseFilePipe({
         validators: [
           new MaxFileSizeValidator({ maxSize: 500000 }),
           new FileTypeValidator({ fileType: 'image/jpeg' }),
         ],
+        fileIsRequired: false,
       }),
     )
-    _file: Express.Multer.File,
-  ) {}
+    _files: Array<Express.Multer.File>,
+    @Body() body: CreateProductRequest,
+    @CurrentUser() user: TokenPayload,
+  ) {
+    return this.productsService.createProduct(body, user.userId, _files);
+  }
 
   @Get()
   @UseGuards(JwtAuthGuard)
-  async getProducts() {
+  getProducts() {
     return this.productsService.getProducts();
   }
 }

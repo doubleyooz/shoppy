@@ -7,6 +7,10 @@ import { LoggerModule } from 'nestjs-pino';
 import { AuthModule } from './auth/auth.module';
 import { ProductsModule } from './products/products.module';
 import * as Joi from 'joi';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
+import { ImagesController } from './images/images.controller';
+import { ImagesModule } from './images/images.module';
 
 @Module({
   imports: [
@@ -40,11 +44,15 @@ import * as Joi from 'joi';
       }),
       isGlobal: true,
     }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public'),
+    }),
     UsersModule,
     AuthModule,
     ProductsModule,
+    ImagesModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, ImagesController],
   providers: [AppService],
 })
 export class AppModule {}

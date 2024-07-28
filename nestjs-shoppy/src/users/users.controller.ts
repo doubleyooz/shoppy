@@ -2,9 +2,13 @@ import {
   Body,
   Controller,
   Get,
+  Param,
+  ParseIntPipe,
   Post,
   UseGuards,
   UseInterceptors,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { CreateUserRequest } from './dto/create-user.request';
 import { UsersService } from './users.service';
@@ -27,5 +31,11 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   me(@CurrentUser() user: TokenPayload) {
     return user;
+  }
+
+  @Get(':id')
+  @UseGuards(JwtAuthGuard)
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.usersService.getUser({ id });
   }
 }

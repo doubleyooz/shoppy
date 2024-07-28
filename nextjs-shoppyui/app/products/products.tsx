@@ -4,7 +4,7 @@ import Product from "./product";
 
 export default async function Products() {
   const products = await getProducts();
-  console.log(products);
+  console.log({ products });
   if (products.length === 0) return <p>No Products Found</p>;
   return (
     <Grid container spacing={3}>
